@@ -6,12 +6,6 @@ contract SkillsMarket {
     // from other organisations
     int8 constant NOT_FOUND = -1;
     
-	// authorities
- 	mapping(address => Certification[]) authorities;
-	// organisation
-	mapping(address => bytes32) organisations;
-	// members for organisation 
-	mapping(address => address[]) members;
 	// qualification 
 	mapping(address => Certification[]) skills;
     // requests
@@ -31,15 +25,38 @@ contract SkillsMarket {
 
     // TODO send signal about new request 
     // TODO mentor finished and certified the mentee 
-    
-    function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
-		require(this.balance >= cost);
-        
-        // find certificate for mentor 
-        int8 mentorCertIdx = NOT_FOUND;
-        Certification[] storage certs = skills[mentor];
+
+    function getSkillLevel(address person, uint hashKey) public constant returns(int) {
+        int skillLevel = NOT_FOUND;
+        Certification[] certs = skills[person];
         for (uint8 idx = 0; idx < certs.length; idx++) {
             if (certs[idx].hashKey == hashKey) {
+                skillLevel = int(certs[idx].spendHours);
+                break;
+            }
+        }
+        return skillLevel;
+    }
+
+    function getSkillName(address person, uint hashKey) public constant returns(bytes32 skillName) {
+        Certification[] certs = skills[person];
+        for (uint8 idx = 0; idx < certs.length; idx++) {
+            if (certs[idx].hashKey == hashKey) {
+                skillName = certs[idx].skill;
+                break;
+            }
+        }
+        return skillName;
+    }
+    
+    function findCertForMentor(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public constant returns(int8 mentorCertIdx) {
+        require(this.balance >= cost);
+        
+        // region find certificate for mentor 
+        mentorCertIdx = NOT_FOUND;
+        Certification[] storage mentorCerts = skills[mentor];
+        for (uint8 idx = 0; idx < mentorCerts.length; idx++) {
+            if (mentorCerts[idx].hashKey == hashKey) {
                 // find cert, use this idx to access it
                 mentorCertIdx = int8(idx);
                 break;
@@ -47,9 +64,44 @@ contract SkillsMarket {
         }
         
         require(mentorCertIdx != NOT_FOUND);
-        // find certificate for skill-mentee 
+        return mentorCertIdx;   
+    }
+
+    function findCertForSkillMentee(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public constant returns(int8 menteeCertIdx) {
+        menteeCertIdx = NOT_FOUND;
+        Certification[] storage certs = skills[mentee];
+        for (uint idx = 0; idx < certs.length; idx++) {
+            if (certs[idx].hashKey == hashKey) {
+                // find cert, use this idx to access it
+                menteeCertIdx = int8(idx);
+                break;
+            }
+        }
+        return menteeCertIdx;
+    }
+
+    function findCertLengthForMentee(address mentee) public constant returns (uint result) {
+        return skills[mentee].length;
+    }
+
+   // change state of blockchain
+    function updateCerts(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
+        // require(this.balance >= cost); TODO something doesn't work here 
+        // region find certificate for mentor 
+        int8 mentorCertIdx = NOT_FOUND;
+        Certification[] storage mentorCerts = skills[mentor];
+        for (uint8 idx = 0; idx < mentorCerts.length; idx++) {
+            if (mentorCerts[idx].hashKey == hashKey) {
+                // find cert, use this idx to access it
+                mentorCertIdx = int8(idx);
+                break;
+            }
+        }
+        
+        require(mentorCertIdx != NOT_FOUND);
+
         int8 menteeCertIdx = NOT_FOUND;
-        certs = skills[mentee];
+        Certification[] storage certs = skills[mentee];
         for (idx = 0; idx < certs.length; idx++) {
             if (certs[idx].hashKey == hashKey) {
                 // find cert, use this idx to access it
@@ -57,9 +109,72 @@ contract SkillsMarket {
                 break;
             }
         }
-        // update certificate 
-        certs[idx].spendHours += time; 
-        skills[mentee] = certs; 
+        
+        if (skills[mentee].length == 0) {
+            Certification memory cert = Certification(
+                hashKey, 
+                mentorCerts[uint8(mentorCertIdx)].skill, 
+                time, 
+                mentorCerts[uint8(mentorCertIdx)].demandHours
+            );
+            skills[mentee].push(cert);
+        } else {
+            // update certificate 
+            certs[idx].spendHours += time; 
+            skills[mentee] = certs;
+        } 
+
+        // provide money transfer
+        msg.sender.transfer(cost);
+    }
+
+    function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
+		require(this.balance >= cost);
+        
+        // region find certificate for mentor 
+        int8 mentorCertIdx = NOT_FOUND;
+        Certification[] storage mentorCerts = skills[mentor];
+        for (uint8 idx = 0; idx < mentorCerts.length; idx++) {
+            if (mentorCerts[idx].hashKey == hashKey) {
+                // find cert, use this idx to access it
+                mentorCertIdx = int8(idx);
+                break;
+            }
+        }
+        
+        require(mentorCertIdx != NOT_FOUND);
+        
+        // endregion
+        
+        // region find certificate for skill-mentee 
+        int8 menteeCertIdx = NOT_FOUND;
+        Certification[] storage certs = skills[mentee];
+        for (idx = 0; idx < certs.length; idx++) {
+            if (certs[idx].hashKey == hashKey) {
+                // find cert, use this idx to access it
+                menteeCertIdx = int8(idx);
+                break;
+            }
+        }
+
+        // endregion
+
+        // region if there is no certificates 
+        if (skills[mentee].length == 0) {
+            Certification memory cert = Certification(
+                hashKey, 
+                mentorCerts[uint8(mentorCertIdx)].skill, 
+                time, 
+                mentorCerts[uint8(mentorCertIdx)].demandHours
+            );
+            skills[mentee].push(cert);
+        } else {
+            // update certificate 
+            certs[idx].spendHours += time; 
+            skills[mentee] = certs;
+        } 
+
+        // endregion
         
         // provide money transfer
         msg.sender.transfer(cost);
@@ -83,38 +198,17 @@ contract SkillsMarket {
         uint spendHours;
         uint demandHours;
     }
-    
-    function SkillsMarket3() public {
-        // define authorities
-        authorities[msg.sender].push(Certification(1, 'authority', 0, 0));
-    }
 	
-	function getCertificateHours(address owner, uint hashKey) public returns(uint) {
-		uint result = NOT_FOUND;
+	function getCertificateHours(address owner, uint hashKey) public returns(int8) {
+		int8 result = NOT_FOUND;
 		Certification[] certs = skills[owner];
 		for (uint8 id = 0; id < certs.length; id++) {
 			if (certs[id].hashKey == hashKey) {
-				result = hashKey; 
+				result = int8(hashKey); 
 			}
 		}
 		return result;
 	} 
-	
-	function getAuthorities() public constant returns(uint) {
-		return authorities[msg.sender].length;
-	}
-	
-	function getSkillForAuthority() public constant returns(uint) {
-		return authorities[msg.sender].length;
-	}
-	
-	function getOrganisation(address org) public constant returns(bytes32) {
-		return organisations[org];
-	} 
-	
-	function getMembersForOrganisation() public constant returns(uint) {
-		return members[msg.sender].length;
-	}
 	
 	function getSkillForMember(address member) public constant returns(uint) {
 		return skills[member].length; 
@@ -124,28 +218,7 @@ contract SkillsMarket {
 		return requests[hash].length; 
 	}
 	
-    function registerSkillOwnershipForAuthority(bytes32 skillName, uint demandHours) public {
-        require(authorities[msg.sender].length != 0);
-        
-        Certification memory cert = Certification(1, skillName, demandHours, demandHours);
-        authorities[msg.sender].push(cert);
-    }
-
-    function registerOrganisation(address org, bytes32 orgName) public {
-        require(authorities[msg.sender].length != 0);
-        organisations[org] = orgName;
-    }
-
-    function registerMemberForOrganisation(address org, address member) public {
-        require(authorities[msg.sender].length != 0 || msg.sender == org);
-        members[msg.sender].push(member);
-    }
-
-    function registerMemberSkills(address member, uint hashKey, bytes32 skill, 
-                                  uint spendHours, uint demandHours) public {
-        // check if sender is authority who owns right to distribute certificates
-        require(authorities[msg.sender].length != 0);
-        
+    function registerMemberSkills(address member, uint hashKey, bytes32 skill, uint spendHours, uint demandHours) public {        
         Certification memory cert = Certification(hashKey, skill, spendHours, demandHours);
         skills[member].push(cert);
     }
