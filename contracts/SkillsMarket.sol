@@ -23,11 +23,28 @@ contract SkillsMarket {
         uint time, 
         uint cost);
 
+    event MentorCertification(
+        address mentor,
+        address mentee,
+        uint256 hashKey,
+        bytes32 skill
+    );
+
+    event Payment(
+        address mentor,
+        address mentee,
+        uint amount
+    );
+
     // TODO send signal about new request 
     // TODO mentor finished and certified the mentee 
 
+    function transferDeposit(address mentee, address mentor) public payable {
+        mentor.transfer(msg.value);
+        Payment(mentor, mentee, msg.value);
+    }
+
     function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
-		require(this.balance >= cost);
         // TODO check if requested mentorship time is equal provided time
         
         int8 mentorCertIdx = NOT_FOUND;
@@ -66,8 +83,8 @@ contract SkillsMarket {
             skills[mentee] = certs;
         } 
 
-        // provide money transfer
-        msg.sender.transfer(cost);
+        // notify listeners
+        MentorCertification(mentor, mentee, hashKey, certs[idx].skill);
     }
 
     struct Mentor {
