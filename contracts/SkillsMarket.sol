@@ -28,8 +28,8 @@ contract SkillsMarket {
 
     function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
 		require(this.balance >= cost);
+        // TODO check if requested mentorship time is equal provided time
         
-        // region find certificate for mentor 
         int8 mentorCertIdx = NOT_FOUND;
         Certification[] storage mentorCerts = skills[mentor];
         for (uint8 idx = 0; idx < mentorCerts.length; idx++) {
@@ -41,10 +41,7 @@ contract SkillsMarket {
         }
         
         require(mentorCertIdx != NOT_FOUND);
-        
-        // endregion
-        
-        // region find certificate for skill-mentee 
+
         int8 menteeCertIdx = NOT_FOUND;
         Certification[] storage certs = skills[mentee];
         for (idx = 0; idx < certs.length; idx++) {
@@ -54,10 +51,7 @@ contract SkillsMarket {
                 break;
             }
         }
-
-        // endregion
-
-        // region if there is no certificates 
+        
         if (skills[mentee].length == 0) {
             Certification memory cert = Certification(
                 hashKey, 
@@ -72,8 +66,6 @@ contract SkillsMarket {
             skills[mentee] = certs;
         } 
 
-        // endregion
-        
         // provide money transfer
         msg.sender.transfer(cost);
     }
@@ -217,13 +209,32 @@ contract SkillsMarket {
         return menteeCertIdx;
     }
 
-    function findCertLengthForMentee(address mentee) public constant returns (uint result) {
+    function findFullCertForSkillMentee(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public constant returns(bytes32, uint, uint) {
+        uint menteeCertIdx;
+        Certification[] storage certs = skills[mentee];
+        for (uint idx = 0; idx < certs.length; idx++) {
+            if (certs[idx].hashKey == hashKey) {
+                // find cert, use this idx to access it
+                menteeCertIdx = idx;
+                break;
+            }
+        }
+        return (certs[menteeCertIdx].skill, certs[menteeCertIdx].spendHours, certs[menteeCertIdx].demandHours);
+    }
+
+    function findCertLengthForMentee(address mentee) public constant returns (uint) {
         return skills[mentee].length;
+    }
+
+    function getCertificate(address person) public constant returns(bytes32, uint, uint) {
+        Certification[] certs = skills[person];
+        return (certs[0].skill, certs[0].spendHours, certs[0].demandHours);
     }
 
    // change state of blockchain
     function updateCerts(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
-        // require(this.balance >= cost); TODO something doesn't work here 
+        require(this.balance >= cost); 
+        // TODO check if mentor spent time is equal time requested by mentee 
         // region find certificate for mentor 
         int8 mentorCertIdx = NOT_FOUND;
         Certification[] storage mentorCerts = skills[mentor];
