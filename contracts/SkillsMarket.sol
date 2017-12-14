@@ -136,7 +136,17 @@ contract SkillsMarket {
 
         SkillToken memory skillToken = SkillToken(org, skill, time, cost);
         requests[hash].push(skillToken); 
+        
+        SkillRequest(hash, org, org, skill, time, cost);
     }
+
+        event SkillRequest(
+        uint256 hash, 
+        address org, 
+        address mentee,
+        bytes32 skill, 
+        uint time, 
+        uint cost);
     
     function hasSkill(bytes32 skill) private returns(bool) {
         bool senderHasSkill = false;
