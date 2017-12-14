@@ -36,6 +36,11 @@ contract SkillsMarket {
         uint amount
     );
 
+    event Debug(
+        address sender,
+        uint code
+    );
+
     // TODO send signal about new request 
     // TODO mentor finished and certified the mentee 
 
@@ -44,8 +49,10 @@ contract SkillsMarket {
         Payment(mentor, mentee, msg.value);
     }
 
-    function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public payable {
+    function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public {
         // TODO check if requested mentorship time is equal provided time
+
+        Debug(msg.sender, 10);
         
         int8 mentorCertIdx = NOT_FOUND;
         Certification[] storage mentorCerts = skills[mentor];
@@ -56,6 +63,8 @@ contract SkillsMarket {
                 break;
             }
         }
+
+        Debug(msg.sender, 20);
         
         require(mentorCertIdx != NOT_FOUND);
 
@@ -68,6 +77,8 @@ contract SkillsMarket {
                 break;
             }
         }
+
+        Debug(msg.sender, 30);
         
         if (skills[mentee].length == 0) {
             Certification memory cert = Certification(
@@ -83,8 +94,11 @@ contract SkillsMarket {
             skills[mentee] = certs;
         } 
 
+        Debug(msg.sender, 40);
         // notify listeners
         MentorCertification(mentor, mentee, hashKey, certs[idx].skill);
+    
+        Debug(msg.sender, 50);
     }
 
     struct Mentor {
@@ -136,17 +150,9 @@ contract SkillsMarket {
 
         SkillToken memory skillToken = SkillToken(org, skill, time, cost);
         requests[hash].push(skillToken); 
-        
-        SkillRequest(hash, org, org, skill, time, cost);
-    }
 
-        event SkillRequest(
-        uint256 hash, 
-        address org, 
-        address mentee,
-        bytes32 skill, 
-        uint time, 
-        uint cost);
+        // SkillRequest(hash, org, org, skill, time, cost);
+    }
     
     function hasSkill(bytes32 skill) private returns(bool) {
         bool senderHasSkill = false;
