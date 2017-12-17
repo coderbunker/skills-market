@@ -64,8 +64,6 @@ contract SkillsMarket {
             }
         }
 
-        Debug(msg.sender, 20);
-        
         require(mentorCertIdx != NOT_FOUND);
 
         int8 menteeCertIdx = NOT_FOUND;
