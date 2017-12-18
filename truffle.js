@@ -8,8 +8,8 @@ module.exports = {
       host: "localhost", 
       port: 8545,
       network_id: "*",
-      from: "0x73bb2520a2c132de287dff9cb25c88cda33f603f",
-	  gas: 4712388
+      from: "0x7648f51a96fc1265c7fe5f3281c02ffb0dd693b9",
+      gas: 4712388
     }
   }
 }
