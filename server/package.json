@@ -1,0 +1,27 @@
+{
+  "name": "utseus_api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "express": "4.16.2",
+    "promise": "^8.0.1",
+    "web3": "^0.19.1"
+  },
+  "devDependencies": {
+    "eslint": "4.13.0",
+    "eslint-plugin-node": "5.2.1"
+  },
+  "scripts": {
+    "start": " env DEBUG=*,-express:* node ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "testrpc": "-g ethereumjs-testrpc"
+  },
+  "author": "ThimoVSS",
+  "license": "ISC"
+}
