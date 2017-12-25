@@ -4,27 +4,27 @@ This folders are part of my local dev environment inside truffle folder.
 
 A whole dev environement takes 80mb space and I hadn't found it reasonable to put it all into the repo.
 
-# Install environement
+## Install environement
 
-# Install Truffle packages
+## Install Truffle packages
 
 ```
 sudo npm install -g truffle
 ```
 
-# Init Truffle project
+## Init Truffle project
 
 ```
 truffle init
 ```
 
-# Install testrpc
+## Install testrpc
 
 ```
 sudo npm install -g ethereumjs-testrpc
 ```
 
-# Launch testrpc
+## Launch testrpc
 
 ```
 testrpc
@@ -36,14 +36,14 @@ Go to app.js file, seek for profiles variable and update account list by what te
 
 source http://www.techtonet.com/how-to-install-and-execute-truffle-on-an-ubuntu-16-04/
 
-# Unpack and run server
+## Unpack and run server
 Unzip server folder, go into and execute
 
 ```
 npm start
 ```
 
-# API
+## API
 
 curl GET http://localhost:3000/api/v1/users
 
