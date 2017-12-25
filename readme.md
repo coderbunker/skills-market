@@ -6,41 +6,40 @@ A whole dev environement takes 80mb space and I hadn't found it reasonable to pu
 
 ## Install environement
 
-## Install Truffle packages
+A whole environment is described in scripts of package.json. Almost all what you need is run this scripts from the server folder. 
 
 ```
-sudo npm install -g truffle
+npm run install
+npm run testrpc
+npm run truffle
 ```
 
-## Init Truffle project
+## Configure truffle.js
+
+Use one of accounts from output of testrpc to put into this truffle.js configuration 
 
 ```
-truffle init
+require('babel-register')
+require('babel-polyfill')
+
+module.exports = {
+  networks: {
+    development: {
+      host: "localhost", 
+      port: 8545,
+      network_id: "*",
+      from: "0x041599451d9bac5bee252a5db569856085666f62",
+      gas: 4712388
+    }
+  }
+}
 ```
 
-## Install testrpc
+## Start the server
+Move back to the server folder and execute this command
 
 ```
-sudo npm install -g ethereumjs-testrpc
-```
-
-## Launch testrpc
-
-```
-testrpc
-```
-
-Testrpc will print out list of accounts. Modify truffle.js to add one of this accounts 
-
-Go to app.js file, seek for profiles variable and update account list by what testrpc printout into console. 
-
-source http://www.techtonet.com/how-to-install-and-execute-truffle-on-an-ubuntu-16-04/
-
-## Unpack and run server
-Unzip server folder, go into and execute
-
-```
-npm start
+npm run start
 ```
 
 ## API
