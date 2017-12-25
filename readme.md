@@ -36,6 +36,25 @@ Go to app.js file, seek for profiles variable and update account list by what te
 
 source http://www.techtonet.com/how-to-install-and-execute-truffle-on-an-ubuntu-16-04/
 
+## Configure truffle.js
+
+```
+require('babel-register')
+require('babel-polyfill')
+
+module.exports = {
+  networks: {
+    development: {
+      host: "localhost", 
+      port: 8545,
+      network_id: "*",
+      from: "0x041599451d9bac5bee252a5db569856085666f62",
+      gas: 4712388
+    }
+  }
+}
+```
+
 ## Unpack and run server
 Unzip server folder, go into and execute
 
