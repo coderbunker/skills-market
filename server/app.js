@@ -24,22 +24,32 @@ const isHackathon = true;
 
 // endregion
 
-// region runtime storage
-
-var profiles = {
-	'Dmitry' : '0xf8db01d22fe2326daa68d0abd2aa9358dccac94f',
-	'Ricky' : '0xf8b4e06ba1db3dd59a3bd7f4f7628f46a60a1973',
-	'Abhishek' : '0xe476892981bcb01ae7324fd49d5ced0e69f489c7'
-}
-
-// endregion
-
 // region initiate Web3
 
 var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545')); 
 console.info('w3', web3.eth.accounts);
 
+// endregion
+
+// region runtime storage
+
+var profiles = {}
+
+createProfiles();
+
+function createProfiles() {
+	var users = utils.getUsers();
+	var accounts = web3.eth.accounts;
+	for (var idx = 0; idx < users.length; idx++) {
+		console.log("w3", "Create user");
+		console.log("w3", users[idx]);
+		profiles[users[idx]] = accounts[idx];
+	}
+	
+	console.log("w3", profiles);
+}
+	
 // endregion
 
 app.use(cors());
