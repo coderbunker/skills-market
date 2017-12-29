@@ -1,16 +1,3 @@
-var express = require('express');
-var app = express();
-
-const debug = require('debug')('utseus-api')
-
-const cors = require('cors');
-const config = require('./config.js');
-const http = require('./http.js');
-const dataset = require('./dataset.js');
-const ethereum = require('./ethereum.js');
-const Promise = require('promise');
-const utils = require('./controllers/utils.js');
-
 // region constant
 
 const API_V1_PREFIX = '/api/v1';
@@ -20,7 +7,28 @@ const COST = 10;
 const BLOCK_COUNT_FULL_LOAD = 12;
 const BLOCK_COUNT_HACKATHON = 0;
 
+const ABI_PATH = 'abi.json';
+
 const isHackathon = true;
+
+// endregion
+
+// region imports
+
+var express = require('express');
+var app = express();
+
+const debug = require('debug')('utseus-api')
+const cors = require('cors');
+const parser = require('./parser/parser.js')
+const config = require('./config.js');
+const http = require('./http.js');
+const dataset = require('./dataset.js');
+const ethereum = require('./ethereum.js');
+const Promise = require('promise');
+const utils = require('./controllers/utils.js');
+const InputDataDecoder = require('ethereum-input-data-decoder');
+const decoder = new InputDataDecoder(ABI_PATH);
 
 // endregion
 
@@ -65,6 +73,134 @@ String.prototype.hashCode = function() {
         hash = hash & hash; // Convert to 32bit integer
     }
     return hash;
+}
+
+app.get(API_V1_PREFIX + '/parser', function (req, res) {
+
+	console.log("w3", "start parser");
+
+	// data length
+	// var input = '0xa5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003';
+	// var params = ['bytes', 'bool', 'uint256[]'];
+	// var mapping = parser.createMapping(input, params);
+	// console.log(mapping.length);
+
+	// test parser
+	var input = '0xa5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003';
+	var params = ['bytes', 'bool', 'uint256[]'];
+	var data = parser.parse(web3, input, params);
+
+	var output = parser.convertFromHexToData(web3, data);
+	for (var id = 0; id < output.length; id++) {
+		console.log("Type: " + output[id].type);
+		console.log("Data: " + output[id].data);
+	}
+	console.log("=== === ===");
+	// console.log("Data length: " + data.length);
+	// console.log(data);
+	// for (var id = 0; id < data.length; id++) {
+	// 	console.log(data[id]);
+	// }
+	// console.log("=== === ===");
+
+	// // test create mapping
+	// var input = '0xa5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003';
+	// var params = ['bytes', 'bool', 'uint256[]'];
+	// var mapping = parser.createMapping(input, params);
+
+	// console.log("w3", "Mapping size: " + mapping.length);
+
+	// for (var id = 0; id < mapping.length; id++) {
+	// 	parser.debug(mapping[id]);
+	// }
+	// // test findEndOfParam 
+
+	// TODO trip the string fron function signature
+	// var data = '0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000004';
+	// var end = parser.findEndOfParam(data, 196);
+	// parser.debug(end);
+
+	// test isDynamicType
+
+	// var bytes = parser.isDynamicType('bytes');
+	// parser.debug(bytes);
+	// var string = parser.isDynamicType('string');
+	// parser.debug(string);
+	// var array = parser.isDynamicType('uint256[]');
+	// parser.debug(array);
+
+	var json = getUsers();
+	res.status(http.SUCCESS).json(json);
+});
+
+app.get(API_V1_PREFIX + '/test', function (req, res) {
+	// console.log("w3", "test");
+	// var txHash = '0x8c5386aee0df24450b6aa5c3b2ecd4c3d65c9dedc7f3317b9377a9d0a113d131';
+	// processInputForTransaction(txHash);
+	// var json = getUsers();
+
+	// var input = '0xce413932ffffffffffffffffffffffffffffffffffffffffffffffffffffffff915b27d9000000000000000000000000e6ee8b1b6a8aef7b53c1941b232131442e51a26a5265616374000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000a';
+	// var params = ['offset', 'uint256'];
+	// ethereum.parseInput(web3, input, params);
+
+	// // 69 and true
+	// var input1 = '0xcdcd77c000000000000000000000000000000000000000000000000000000000000000450000000000000000000000000000000000000000000000000000000000000001';
+	// var params1 = ['offset', 'uint32', 'bool'];
+	// ethereum.parseInput(web3, input1, params1);
+
+	// // ["abc", "def"]
+	// var input2 = '0xfce353f661626300000000000000000000000000000000000000000000000000000000006465660000000000000000000000000000000000000000000000000000000000';
+	// var params2 = ['offset', 'bytes3', 'bytes3'];
+	// ethereum.parseInput(web3, input2, params2);
+
+	// console.log("w3", "=== === ===");
+	// console.log("w3", "Test 3");
+	// console.log("w3", "=== === ===");
+
+	// // hash of skill, mentee address, React, 10
+	// var input3 = '0xce413932ffffffffffffffffffffffffffffffffffffffffffffffffffffffff915b27d9000000000000000000000000868adea4b89c5d9e52ced68d856af9371031be795265616374000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000a';
+	// var params3 = ['offset', 'uint256', 'address', 'bytes32', 'uint', 'uint'];
+	// ethereum.parseInput(web3, input3, params3);
+
+	// console.log("w3", "=== === ===");
+	// console.log("w3", "END");
+	// console.log("w3", "=== === ===");
+
+	// address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost
+	var input4 = '0x6660339c000000000000000000000000c53e280bf59a25b60af2afd55435e08f2aba6814000000000000000000000000868adea4b89c5d9e52ced68d856af9371031be79ffffffffffffffffffffffffffffffffffffffffffffffffffffffff915b27d9000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000064';
+	var params4 = ['offset', 'address', 'address', 'uint256', 'uint8', 'uint8'];
+	ethereum.parseInput(web3, input4, params4);
+
+	var input5 = '0xa5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003';
+	var params5 = ['offset', 'address', 'address', 'uint256', 'uint8', 'uint8'];
+	ethereum.parseInput(web3, input5, params5);
+
+	var input6 = '0xa5643bf20000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000000464617665000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003';
+	addRow('dave', 'bytes', 'dynamic');
+	addRow(true, 'bool', 'static');
+	addRow('[1,2,3]', 'uint256[]', 'dynamic');
+	var params6 = getParameters();
+	ethereum.parseDynamic(web3, input6, params6);
+
+	var json = getUsers();
+	res.status(http.SUCCESS).json(json);
+	// web3.eth.getTransaction(txHash, function(err,result) {
+	// 	console.log
+	// 	return result;
+	// });
+});
+
+var params = [];
+
+function getParameters() {
+	return params;
+}
+
+function addRow(data, type) {
+	var object = new Object();
+	object.data = data;
+	object.type = type;
+	params.push(object);
 }
 
 app.get(API_V1_PREFIX + '/users', function (req, res) {
@@ -330,7 +466,8 @@ function startConsensus(currentNode, txHash, blockCount, timeout) {
                 updateTransaction(txHash, true);
                 return resolve(txHash, true);
             }
-        }
+		}
+
         ethereum.awaitBlockConsensus(currentNode, txHash, blockCount, timeout, callback);
     });
 }
@@ -352,6 +489,9 @@ function certify(mentorAccount, menteeAccount, skill, time) {
 	return new Promise(function(resolve, reject) {
 		console.log("w3", "[start] certify");
 		var callback = function(err, txHash) {
+			
+			processInputForTransaction(txHash);
+			
 			if (err) {
 				reject(prepareResponse(false, err));
 			} else {
@@ -558,6 +698,27 @@ function updateTransaction(txHash, isMined) {
 	if (!isProcessed) {
 		addTransaction(txHash, isMined);
 	}
+}
+
+// endregion
+
+// region decoder
+
+// processInputForTransaction
+
+function processInputForTransaction(txHash) {
+	console.log("w3", "start - processInputForTransaction");
+	const abi = JSON.parse(fs.readFileSync(ABI_PATH));
+	const decoder = new InputDataDecoder(abi);
+
+	web3.eth.getTransaction(txHash, (error, txResult) => {
+		console.log("w3", "getTransaction callback - start");
+		console.log("w3", txResult);
+		const result = decoder.decodeData(txResult.input);
+		console.log(result);
+		console.log("w3", "getTransaction callback - end");
+	});
+	console.log("w3", "end - processInputForTransaction");
 }
 
 // endregion

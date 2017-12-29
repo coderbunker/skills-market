@@ -9,6 +9,7 @@
   "dependencies": {
     "cors": "^2.8.4",
     "debug": "^3.1.0",
+    "ethereum-input-data-decoder": "0.0.3",
     "ethereumjs-testrpc": "^6.0.3",
     "express": "4.16.2",
     "promise": "^8.0.1",
@@ -22,11 +23,12 @@
   "scripts": {
     "start": "env DEBUG=*,-express:* node ./app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": " npm install truffle && npm install ethereumjs-testrpc",
+    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder",
     "truffle": "truffle init",
     "testrpc": "testrpc",
+    "decoder": "ethereum-input-data-decoder",
     "print-hello": "echo 'hello world'"
   },
-  "author": "ThimoVSS",
+  "author": "ThimoVSS, DmitryK",
   "license": "ISC"
 }
