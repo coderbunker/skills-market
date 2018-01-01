@@ -1,14 +1,4 @@
-var types = {
-    'offset' : 10,
-    'uint256' : 64,
-    'address' : 64,
-    'bytes32' : 64, // TODO check me
-    'uint32' : 64,
-    'bytes3' : 64,
-    'bool' : 64,
-    'uint' : 64,
-    'uint8' : 64
-}
+var signatures = {};
 
 var ELEMENT_SIZE = 64;
 
@@ -23,13 +13,6 @@ var output = [];
 
 module.exports = {
 
-    test: function(input) {
-        input = module.exports.getInputWithoutSignature(input);
-        console.log(input);
-        var str = input.slice(384, 576);
-        return str;
-    },
-
     parse: function(web3, input, params) {
         const mapping = module.exports.createMapping(input, params);
         const size = JSON.parse(JSON.stringify(mapping.length));;
@@ -42,13 +25,7 @@ module.exports = {
                 locator.begin, 
                 locator.end);
         }
-
-        return module.exports.getData();
-        // return module.exports.convertFromHexToData(web3, module.exports.getData());
-    },
-
-    getData: function() {
-        return output;
+        return module.exports.convertFromHexToData(web3, output);
     },
 
     pushData: function(data, type) {
@@ -191,7 +168,6 @@ module.exports = {
         var result = new Object();
         result.type = dataType;
         result.data = "tbd";
-        data = '0x' + data;
         switch(dataType) {
           case 'uint256[]':
           case 'uint256':
@@ -227,9 +203,58 @@ module.exports = {
 
         return result; 
     },
-  
+
+    addSignature: function(signature, params) {
+        var key = signature.substring(0, 10);
+        console.log("Signature key init: " + key);
+        signatures[key] = params;
+    },
+
+    getParamsForSignature: function(input) {
+        var key = input.substring(0, 10);
+        var params = signatures[key];
+        return params == 'undefined' ? [] : signature[key];
+    }, 
+
+    getSignatureSize: function() {
+        return signatures.length;
+    },
+
+    getSignatures: function() {
+        return signatures;
+    },
+
+    isTrackedTransaction: function(input) {
+        var key = input.substring(0, 10);
+        console.log("Signature key: " + key);
+        console.log("Signature value: " + signatures[key]);
+        return signatures[key] != 'undefined';
+    },
+
     addHexPrefix: function(data) {
         return '0x' + data;
+    },
+
+    parseSkillFromByteArrayInString : function(data) {
+        var tokens = JSON.stringify(result.inputs[2]).split(":");
+        var data = tokens[3];
+        data = data.slice(0, data.length - 1);
+        console.log("Data: " + data);
+        // data = data.replace(",", "");
+        return data; 
+    },
+
+    parseSkill : function(data) {
+        var buffer = new Buffer(data).toString();
+        var result = buffer.replace(/\0/g, '');
+        return result;
+    },
+
+    parseTime : function(data) {
+        data = JSON.stringify(data);
+        data = data.substring(5, data.length - 2);
+        var result = parseInt(data, 16);
+        return result;
     },
 
     debug: function(data) {

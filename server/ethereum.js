@@ -347,7 +347,7 @@ module.exports = {
         case 'bytes32':
           module.exports.debug('bytes32 type');  
           module.exports.debug(web3.toUtf8(data));
-          break;
+          break;  
         case 'uint32':
           // [TEST PASSED]
           module.exports.debug('uint32 type');

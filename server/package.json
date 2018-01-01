@@ -18,12 +18,13 @@
   },
   "devDependencies": {
     "eslint": "4.13.0",
-    "eslint-plugin-node": "5.2.1"
+    "eslint-plugin-node": "5.2.1",
+    "jest": "^22.0.4"
   },
   "scripts": {
     "start": "env DEBUG=*,-express:* node ./app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder",
+    "test": "jest",
+    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest",
     "truffle": "truffle init",
     "testrpc": "testrpc",
     "decoder": "ethereum-input-data-decoder",
