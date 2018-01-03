@@ -36,6 +36,11 @@ module.exports = {
   }
 }
 ```
+## Setup users
+Both skills and users are preconfigured on the server. To setup users go to `utils.js` and put new data into array `users` 
+
+## Setup skills
+To setup users go to file `dataset.js` and fill data into variable `skills`
 
 ## Start the server
 Move back to the server folder and execute this command
