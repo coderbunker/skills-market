@@ -206,7 +206,6 @@ module.exports = {
 
     addSignature: function(signature, params) {
         var key = signature.substring(0, 10);
-        console.log("Signature key init: " + key);
         signatures[key] = params;
     },
 
@@ -226,8 +225,6 @@ module.exports = {
 
     isTrackedTransaction: function(input) {
         var key = input.substring(0, 10);
-        console.log("Signature key: " + key);
-        console.log("Signature value: " + signatures[key]);
         return signatures[key] != 'undefined';
     },
 
@@ -239,8 +236,6 @@ module.exports = {
         var tokens = JSON.stringify(result.inputs[2]).split(":");
         var data = tokens[3];
         data = data.slice(0, data.length - 1);
-        console.log("Data: " + data);
-        // data = data.replace(",", "");
         return data; 
     },
 

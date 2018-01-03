@@ -100,11 +100,10 @@ describe("Test NodeJS API", function() {
     it("Request /validate - negative scenario - return error message", function(done) {
         // TODO complete me when you finish function with tx hash 
         // 'No receipt for this txHash'
-        var json = JSON.parse(body);
-        var urlValidate = url + "/validate/" + json.payload;
+        var urlValidate = url + "/validate/0x37049";
         request.get(urlValidate, function(error, response, body) {
             var json = JSON.parse(body);
-            expect(json.success).is.equal(true);
+            expect(json.success).is.equal(false);
             done();
         });
     });
