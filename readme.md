@@ -1,8 +1,6 @@
 # Intro
 
-This folders are part of my local dev environment inside truffle folder. 
-
-A whole dev environement takes 80mb space and I hadn't found it reasonable to put it all into the repo.
+This is MVP for one of our client (UTSEUS) which helps teams on hackathons exchange skills among team members and pay for their help.  It has three modules: web client (React), server (NodeJS) and storage with some business logic on blockchain (ethereum). This doc descriebs how to setup environment and run server backed by blockchian. 
 
 ## Install environment
 
