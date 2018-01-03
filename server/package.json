@@ -11,20 +11,24 @@
     "debug": "^3.1.0",
     "ethereum-input-data-decoder": "0.0.3",
     "ethereumjs-testrpc": "^6.0.3",
-    "express": "4.16.2",
     "promise": "^8.0.1",
     "truffle": "^4.0.4",
     "web3": "^0.19.1"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
     "eslint": "4.13.0",
     "eslint-plugin-node": "5.2.1",
-    "jest": "^22.0.4"
+    "express": "^4.16.2",
+    "jest": "^22.0.4",
+    "mocha": "^4.1.0",
+    "request": "^2.83.0"
   },
   "scripts": {
     "start": "env DEBUG=*,-express:* node ./app.js",
-    "test": "jest",
-    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest",
+    "test-mocha": "./node_modules/.bin/mocha --reporter spec",
+    "test-jest": "jest",
+    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai",
     "truffle": "truffle init",
     "testrpc": "testrpc",
     "decoder": "ethereum-input-data-decoder",

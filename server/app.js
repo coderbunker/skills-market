@@ -88,31 +88,6 @@ String.prototype.hashCode = function() {
     return hash;
 }
 
-// app.get(API_V1_PREFIX + '/test', function (req, res) {
-// 	emulateHisotryCall().then(() => {
-// 		console.log('========= RETURN TEST RESPONSE ==========');
-// 		var json = 'return test response';//JSON.parse(getHistory());
-// 		res.status(http.SUCCESS).json(json);
-// 	});	
-// 	// var json = getUsers();
-// 	// res.status(http.SUCCESS).json(json);
-// });
-
-// function emulateHisotryCall() {
-// 	return new Promise(function(resolve, reject) {
-// 		var txHash = '0x3118bb7a3a4e53ba07b2b153894cc5f1e5a6e689d4ba5601ee1a3591d70582fd';
-// 		web3.eth.getTransaction(txHash, (error, txResult) => {
-// 			console.log("========== innerFunctionCall ==========");
-// 			innerFunctionCall(resolve, reject);
-// 		});
-		
-// 	})
-// }
-
-// function innerFunctionCall(resolve, reject) {
-// 	return resolve();
-// }
-
 app.get(API_V1_PREFIX + '/users', function (req, res) {
 	console.log("w3", "request users");
 	console.log("w3", getUsers());
@@ -134,7 +109,8 @@ app.post(API_V1_PREFIX + '/help/:mentee/:skill/:time', function (req, res) {
 	const skill = req.params.skill;
 	const time = req.params.time;
     if (!(profileName in profiles)) {
-        res.status(http.BAD_REQUEST).send('User is not valid');
+		res.status(http.BAD_REQUEST)
+		   .send(utils.prepareResponse('User is not valid'));
     } else {
 		console.log("w3", "Process help request");
 		askForHelp(profileName, ORGANISATION, skill, time, COST)
@@ -161,7 +137,7 @@ app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (re
 	const skill = req.params.skill;
 	const time = req.params.time;
 	if (!(mentor in profiles) || !(mentee in profiles)) {
-		res.status(http.BAD_REQUEST).send("User is not registered");
+		res.status(http.BAD_REQUEST).send(utils.prepareResponse("User is not registered"));
 	} else {
 		certify(getAccountByName(mentor), getAccountByName(mentee), skill, time)
 			.then(function(txHash) {
@@ -226,7 +202,7 @@ function registerMemberWithSkill(member, skill) {
 		createCertificate(member, skill, ORGANISATION);
 		fulfill({
 			status: http.SUCCESS,
-			message: 'user was successfully registered'
+			message: utils.prepareResponse('user was successfully registered')
 		}); 
 	});
 }
@@ -457,7 +433,7 @@ var historyHashes = [];
 
 function trackHistory(data, resolve, reject) {
 	console.log("trackHistory");
-	var countDownLatch = 0;
+	counter.reset();
 	for (var id = 0; id < data.length; id++) {
 		const tx = data[id];
 		web3.eth.getTransaction(tx.hash, (error, txResult) => {
@@ -475,12 +451,12 @@ function trackHistory(data, resolve, reject) {
 				console.log(history);
 			}
 			console.log("trackHistory:getTransaction:end");
-			trackHistoryCallback(data.length, countDownLatch, resolve, reject);
+			trackHistoryCallback(data.length, resolve, reject);
 		});
 	}
 }
 
-function trackHistoryCallback(total, countDownLatch, resolve, reject) {
+function trackHistoryCallback(total, resolve, reject) {
 	counter.add();	
 	console.log("Hit trackHistoryCallback: " + counter.get() + " from " + total);
 	if (counter.get() == (total - 1)) {

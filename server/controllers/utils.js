@@ -7,6 +7,13 @@ var users = [
 var transactions = [];
 
 module.exports = {
+
+    prepareResponse : function(message) {
+        // TODO for now simple message is left for backward compatibility
+        // var response = {'status' : status, 'message' : message};
+        return message;
+    },
+
     getAccountByName : function(profiles, searchKey) {
         console.log("w3", "getAccountByName");
         var account;
