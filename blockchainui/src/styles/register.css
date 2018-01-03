@@ -1,0 +1,26 @@
+html, body {
+  background-color: rgb(250, 250, 251);
+}
+
+.no-highlight {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  padding: 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  background-color: white !important;
+}
+
+.no-highlight:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.green-button {
+  background-color: #5cb85c;
+  color: white;
+  margin: 5px;
+}
+
+.white-button {
+  margin: 5px;
+}
