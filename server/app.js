@@ -431,39 +431,6 @@ var history = [];
 
 var historyHashes = [];
 
-function trackHistory(data, resolve, reject) {
-	console.log("trackHistory");
-	counter.reset();
-	for (var id = 0; id < data.length; id++) {
-		const tx = data[id];
-		web3.eth.getTransaction(tx.hash, (error, txResult) => {
-			// no handle error
-			const result = decoder.decodeData(txResult.input);
-			var isItRightTx2 = JSON.stringify(result) != JSON.stringify({});
-			if (isItRightTx2) {
-				var item = { 
-					"from" : getNameByAccount(tx.from), 
-					"to" : getNameByAccount(tx.to), 
-					"skill" : parser.parseSkill(result.inputs[2]), 
-					"time" : parser.parseTime(result.inputs[3])
-				};
-				history.push(JSON.stringify(item));
-				console.log(history);
-			}
-			console.log("trackHistory:getTransaction:end");
-			trackHistoryCallback(data.length, resolve, reject);
-		});
-	}
-}
-
-function trackHistoryCallback(total, resolve, reject) {
-	counter.add();	
-	console.log("Hit trackHistoryCallback: " + counter.get() + " from " + total);
-	if (counter.get() == (total - 1)) {
-		return resolve();
-	}
-}
-
 function getHistory() {
 	console.log(history);
 	return "[" + history + "]";
@@ -483,30 +450,33 @@ function trackHistoryTransaction(txHash) {
 
 function transactionHistory() {
 	return new Promise(function(resolve, reject) {
-		console.log("w3", "start transactionHistory");
 		var data = [];
 		var latestBlockId = web3.eth.getBlock("latest").number;
 		while (latestBlockId > 0) {
 			var block = web3.eth.getBlock(latestBlockId, true);
-			for (var txId = 0; txId < block.transactions.length; txId++) {
-				block.transactions.forEach(function(tx) {
-					console.log("w3", tx);
-					console.log("w3", tx.input);
-					if (utils.isAccountInProfiles(profiles, tx.from)
-						|| utils.isAccountInProfiles(profiles, tx.to)) {
-						console.log("w3", "Hit result set");
-						data.push(tx);
-						// trackHistory(tx.hash, tx.from, tx.to);
+			block.transactions.forEach(function(tx) {
+				if (parser.isTrackedTransaction(tx.input)) {
+					const result = decoder.decodeData(tx.input);
+					var isItRightTx2 = JSON.stringify(result) != JSON.stringify({});
+					if (isItRightTx2) {
+						console.log(result);
+						var item = { 
+							"from" : getNameByAccount("0x" + result.inputs[0]), 
+							"to" : getNameByAccount("0x" + result.inputs[1]), 
+							"skill" : parser.parseSkill(result.inputs[2]), 
+							"time" : parser.parseTime(result.inputs[3])
+						};
+						history.push(JSON.stringify(item));
+						console.log(history);
 					}
-				});
-			}
+				}
+			}); 
 			latestBlockId--;
 		}
 
-		// TODO process array
 		console.log("w3", "end transactionHistory. Start track history");
-		// return resolve();
-		trackHistory(data, resolve, reject);
+		return resolve();
+		// trackHistory(data, resolve, reject);
 	});
 }
 

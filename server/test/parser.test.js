@@ -62,13 +62,32 @@ test('test continuation bytes - dave as bytes', () => {
     expect(result).toBe('dave');
 });
 
-test('parseSkill - second attempt', () => {
-    var data = "{\"type\":\"Buffer\",\"data\":[82,101,97,99,116,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}";
-});
-
 test('parseTime - return item', () => {
     var data = "<BN: a>";
     var time = subject.parseTime(data);
     expect(time).toBe(10);
 });
 
+test('add signature - signatures size is incremented', () => {
+    subject.addSignature(generateSignature());
+
+    expect(subject.getSignatureSize()).toBe(1);
+});
+
+test('check valid signature - returns true', () => {
+    subject.addSignature(generateSignature());
+    const isTrackedTx = subject.isTrackedTransaction('0x6660339c0000000000000000000000004');
+
+    expect(isTrackedTx).toBe(true);
+});
+
+test('check invalid signature - returns false', () => {
+    subject.addSignature(generateSignature());
+    const isTrackedTx = subject.isTrackedTransaction('0x234560339c0000000000000000000000004');
+
+    expect(isTrackedTx).toBe(false);
+});
+
+function generateSignature() {
+    return web3.sha3('certify(address,address,uint256,uint8,uint8)');
+}

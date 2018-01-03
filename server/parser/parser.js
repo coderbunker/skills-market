@@ -1,4 +1,4 @@
-var signatures = {};
+var signatures = [];
 
 var ELEMENT_SIZE = 64;
 
@@ -206,7 +206,7 @@ module.exports = {
 
     addSignature: function(signature, params) {
         var key = signature.substring(0, 10);
-        signatures[key] = params;
+        signatures.push(key);
     },
 
     getParamsForSignature: function(input) {
@@ -225,7 +225,7 @@ module.exports = {
 
     isTrackedTransaction: function(input) {
         var key = input.substring(0, 10);
-        return signatures[key] != 'undefined';
+        return signatures.includes(key);
     },
 
     addHexPrefix: function(data) {
@@ -240,7 +240,9 @@ module.exports = {
     },
 
     parseSkill : function(data) {
+        console.log("Before buffer: " + data);
         var buffer = new Buffer(data).toString();
+        console.log("After buffer: " + buffer);
         var result = buffer.replace(/\0/g, '');
         return result;
     },
