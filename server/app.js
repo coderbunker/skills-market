@@ -1,16 +1,3 @@
-var express = require('express');
-var app = express();
-
-const debug = require('debug')('utseus-api')
-
-const cors = require('cors');
-const config = require('./config.js');
-const http = require('./http.js');
-const dataset = require('./dataset.js');
-const ethereum = require('./ethereum.js');
-const Promise = require('promise');
-const utils = require('./controllers/utils.js');
-
 // region constant
 
 const API_V1_PREFIX = '/api/v1';
@@ -20,17 +7,29 @@ const COST = 10;
 const BLOCK_COUNT_FULL_LOAD = 12;
 const BLOCK_COUNT_HACKATHON = 0;
 
+const ABI_PATH = 'abi.json';
+
 const isHackathon = true;
 
 // endregion
 
-// region runtime storage
+// region imports
 
-var profiles = {
-	'Dmitry' : '0xf8db01d22fe2326daa68d0abd2aa9358dccac94f',
-	'Ricky' : '0xf8b4e06ba1db3dd59a3bd7f4f7628f46a60a1973',
-	'Abhishek' : '0xe476892981bcb01ae7324fd49d5ced0e69f489c7'
-}
+var express = require('express');
+var app = express();
+
+const debug = require('debug')('utseus-api')
+const cors = require('cors');
+const parser = require('./parser/parser.js')
+const config = require('./config.js');
+const http = require('./http.js');
+const dataset = require('./dataset.js');
+const ethereum = require('./ethereum.js');
+const Promise = require('promise');
+const utils = require('./controllers/utils.js');
+const counter = require('./parser/counter.js');
+const InputDataDecoder = require('ethereum-input-data-decoder');
+const fs = require("fs");
 
 // endregion
 
@@ -40,6 +39,38 @@ var Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545')); 
 console.info('w3', web3.eth.accounts);
 
+parser.addSignature(
+	web3.sha3('certify(address,address,uint256,uint8,uint8)'),
+	['address','address','uint256','uint8','uint8']
+);
+parser.addSignature(
+	web3.sha3('askForHelp(uint256,address,bytes32,uint,uint)'),
+	['uint256','address','bytes32','uint','uint']
+);
+
+const abi = JSON.parse(fs.readFileSync(ABI_PATH));
+const decoder = new InputDataDecoder(abi);
+
+// endregion
+
+// region runtime storage
+
+var profiles = {}
+
+createProfiles();
+
+function createProfiles() {
+	var users = utils.getUsers();
+	var accounts = web3.eth.accounts;
+	for (var idx = 0; idx < users.length; idx++) {
+		console.log("w3", "Create user");
+		console.log("w3", users[idx]);
+		profiles[users[idx]] = accounts[idx];
+	}
+	
+	console.log("w3", profiles);
+}
+	
 // endregion
 
 app.use(cors());
@@ -78,7 +109,8 @@ app.post(API_V1_PREFIX + '/help/:mentee/:skill/:time', function (req, res) {
 	const skill = req.params.skill;
 	const time = req.params.time;
     if (!(profileName in profiles)) {
-        res.status(http.BAD_REQUEST).send('User is not valid');
+		res.status(http.BAD_REQUEST)
+		   .send(utils.prepareResponse('User is not valid'));
     } else {
 		console.log("w3", "Process help request");
 		askForHelp(profileName, ORGANISATION, skill, time, COST)
@@ -105,7 +137,7 @@ app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (re
 	const skill = req.params.skill;
 	const time = req.params.time;
 	if (!(mentor in profiles) || !(mentee in profiles)) {
-		res.status(http.BAD_REQUEST).send("User is not registered");
+		res.status(http.BAD_REQUEST).send(utils.prepareResponse("User is not registered"));
 	} else {
 		certify(getAccountByName(mentor), getAccountByName(mentee), skill, time)
 			.then(function(txHash) {
@@ -116,7 +148,6 @@ app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (re
 				res.status(http.SUCCESS).send(prepareResponse(true, txHash));
 				
 				markedRequestAsProcessedInWaitingQueue(mentee, ORGANISATION, skill, time);
-
 				return startConsensus(web3, txHash, blockCount, timeout);
 			})
 			.catch(function(err) {
@@ -171,7 +202,7 @@ function registerMemberWithSkill(member, skill) {
 		createCertificate(member, skill, ORGANISATION);
 		fulfill({
 			status: http.SUCCESS,
-			message: 'user was successfully registered'
+			message: utils.prepareResponse('user was successfully registered')
 		}); 
 	});
 }
@@ -209,7 +240,6 @@ process.stdout.write("starting web3..");
 
 // region deploy the contract
 
-let fs = require("fs");
 let source = fs.readFileSync("SkillsMarket.js");
 console.info('w3', source);
 let contracts = JSON.parse(source)["contracts"];
@@ -320,7 +350,8 @@ function startConsensus(currentNode, txHash, blockCount, timeout) {
                 updateTransaction(txHash, true);
                 return resolve(txHash, true);
             }
-        }
+		}
+
         ethereum.awaitBlockConsensus(currentNode, txHash, blockCount, timeout, callback);
     });
 }
@@ -342,6 +373,9 @@ function certify(mentorAccount, menteeAccount, skill, time) {
 	return new Promise(function(resolve, reject) {
 		console.log("w3", "[start] certify");
 		var callback = function(err, txHash) {
+			
+			processInputForTransaction(txHash);
+			
 			if (err) {
 				reject(prepareResponse(false, err));
 			} else {
@@ -395,24 +429,40 @@ debugEventListener.watch(function(error, result) {
 
 var history = [];
 
-function trackHistory(from, to, skill, time) {
-	console.log("w3", from);
-	console.log("w3", to);
-	console.log("w3", skill);
-	console.log("w3", time);
-	console.log("w3", "getNameByAccount(from): " + getNameByAccount(from));
-	console.log("w3", "getNameByAccount(to): " + getNameByAccount(to));
+var historyHashes = [];
 
-	var item = { 
-		"from" : getNameByAccount(from), 
-		"to" : getNameByAccount(to), 
-		"skill" : skill, 
-		"time" : time
-	};
-	console.log("w3", item);
-	history.push(JSON.stringify(item));
-	console.log("w3", "history size: " + history.length);
-} 
+function trackHistory(data, resolve, reject) {
+	console.log("trackHistory");
+	counter.reset();
+	for (var id = 0; id < data.length; id++) {
+		const tx = data[id];
+		web3.eth.getTransaction(tx.hash, (error, txResult) => {
+			// no handle error
+			const result = decoder.decodeData(txResult.input);
+			var isItRightTx2 = JSON.stringify(result) != JSON.stringify({});
+			if (isItRightTx2) {
+				var item = { 
+					"from" : getNameByAccount(tx.from), 
+					"to" : getNameByAccount(tx.to), 
+					"skill" : parser.parseSkill(result.inputs[2]), 
+					"time" : parser.parseTime(result.inputs[3])
+				};
+				history.push(JSON.stringify(item));
+				console.log(history);
+			}
+			console.log("trackHistory:getTransaction:end");
+			trackHistoryCallback(data.length, resolve, reject);
+		});
+	}
+}
+
+function trackHistoryCallback(total, resolve, reject) {
+	counter.add();	
+	console.log("Hit trackHistoryCallback: " + counter.get() + " from " + total);
+	if (counter.get() == (total - 1)) {
+		return resolve();
+	}
+}
 
 function getHistory() {
 	console.log(history);
@@ -423,6 +473,10 @@ function getNameByAccount(account) {
 	return getKeyByValue(profiles, account);
 }
 
+function trackHistoryTransaction(txHash) {
+	historyHashes.push(txHash);
+}
+
 // endregion
 
 // region transaction history
@@ -430,24 +484,29 @@ function getNameByAccount(account) {
 function transactionHistory() {
 	return new Promise(function(resolve, reject) {
 		console.log("w3", "start transactionHistory");
+		var data = [];
 		var latestBlockId = web3.eth.getBlock("latest").number;
 		while (latestBlockId > 0) {
 			var block = web3.eth.getBlock(latestBlockId, true);
 			for (var txId = 0; txId < block.transactions.length; txId++) {
 				block.transactions.forEach(function(tx) {
 					console.log("w3", tx);
-					console.log("w3", web3.toAscii(tx.input));
+					console.log("w3", tx.input);
 					if (utils.isAccountInProfiles(profiles, tx.from)
 						|| utils.isAccountInProfiles(profiles, tx.to)) {
 						console.log("w3", "Hit result set");
-						trackHistory(tx.from, tx.to, web3.toAscii(tx.input), "undefined");
+						data.push(tx);
+						// trackHistory(tx.hash, tx.from, tx.to);
 					}
 				});
 			}
 			latestBlockId--;
 		}
-		console.log("w3", "end transactionHistory");
-		return resolve();
+
+		// TODO process array
+		console.log("w3", "end transactionHistory. Start track history");
+		// return resolve();
+		trackHistory(data, resolve, reject);
 	});
 }
 
@@ -548,6 +607,27 @@ function updateTransaction(txHash, isMined) {
 	if (!isProcessed) {
 		addTransaction(txHash, isMined);
 	}
+}
+
+// endregion
+
+// region decoder
+
+// processInputForTransaction
+
+function processInputForTransaction(txHash) {
+	console.log("w3", "start - processInputForTransaction");
+	const abi = JSON.parse(fs.readFileSync(ABI_PATH));
+	const decoder = new InputDataDecoder(abi);
+
+	web3.eth.getTransaction(txHash, (error, txResult) => {
+		console.log("w3", "getTransaction callback - start");
+		console.log("w3", txResult);
+		const result = decoder.decodeData(txResult.input);
+		console.log(result);
+		console.log("w3", "getTransaction callback - end");
+	});
+	console.log("w3", "end - processInputForTransaction");
 }
 
 // endregion

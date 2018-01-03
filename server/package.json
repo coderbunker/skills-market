@@ -9,19 +9,31 @@
   "dependencies": {
     "cors": "^2.8.4",
     "debug": "^3.1.0",
-    "express": "4.16.2",
+    "ethereum-input-data-decoder": "0.0.3",
+    "ethereumjs-testrpc": "^6.0.3",
     "promise": "^8.0.1",
+    "truffle": "^4.0.4",
     "web3": "^0.19.1"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
     "eslint": "4.13.0",
-    "eslint-plugin-node": "5.2.1"
+    "eslint-plugin-node": "5.2.1",
+    "express": "^4.16.2",
+    "jest": "^22.0.4",
+    "mocha": "^4.1.0",
+    "request": "^2.83.0"
   },
   "scripts": {
-    "start": " env DEBUG=*,-express:* node ./app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "testrpc": "-g ethereumjs-testrpc"
+    "start": "env DEBUG=*,-express:* node ./app.js",
+    "test-mocha": "./node_modules/.bin/mocha --reporter spec",
+    "test-jest": "jest",
+    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai",
+    "truffle": "truffle init",
+    "testrpc": "testrpc",
+    "decoder": "ethereum-input-data-decoder",
+    "print-hello": "echo 'hello world'"
   },
-  "author": "ThimoVSS",
+  "author": "ThimoVSS, DmitryK",
   "license": "ISC"
 }

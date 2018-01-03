@@ -1,3 +1,16 @@
+
+var types = {
+  'offset' : 10,
+  'uint256' : 64,
+  'address' : 64,
+  'bytes32' : 64, // TODO check me
+  'uint32' : 64,
+  'bytes3' : 64,
+  'bool' : 64,
+  'uint' : 64,
+  'uint8' : 64
+}
+
 module.exports = {
 
     printTransaction: function(eth, txHash) {
@@ -207,5 +220,175 @@ module.exports = {
    
       interval = setInterval(poll, 1000);
       poll();
-    }
+    },
+
+    parseDynamicInput: function(web3, input, params) {
+      // data 
+      var result = [];
+      var shift = 0;
+      for (var idx = 0; idx < params.length; idx++) {
+        // TODO get offset from params
+        // TODO get dynamic params, check length 
+        var resultObj;
+        if (params[idx].type == 'dynamic') {
+          resultObj = module.exports.parseDynamic(web3, params[idx].data, input, params);
+        } else {
+          resultObj = module.exports.parseStatic();
+        }
+        for (var id = 0; id < resultObj.data.length; id++) {
+          result.push(resultObj.data[id]);
+        }
+      }
+      console.log(result);
+    },
+
+    parseDynamic: function(web3, data, originInput, dataPointer) {
+      var result = new Object();
+      result.data = [];
+      result.offset = 0;
+
+      var pointer = parseInt(dataPointer, 16);
+      var shift = pointer * 2;
+      if (data instanceof Array) {
+        for (var idx = 0; idx < data.length; idx++) {
+          var resultObj = module.exports.extractData(originInput, data[idx], shift);
+          result.data.push(resultObj.data);
+          shift = resultObj.offset;
+        }
+      } else {
+        // we can not use shift here as it doesn't go within the order 
+        var resultObj = module.exports.extractData(originInput, data, shift);
+        result.data.push(resultObj.data);
+      }
+
+      result.offset = shift;
+      return result;
+    },
+
+    parseStatic: function(web3, input, params) {
+
+    },
+
+    extractData: function(input, parameter, shift) {
+      var offset = types[param];
+      var data = originInput.slice(shift, shift + offset);
+      shift += offset;
+
+      var result = new Object();
+      result.data = data;
+      result.offset = offset;  
+      return result;
+    },
+
+    parseInput: function(web3, input, params) {
+      var result = [];
+      var shift = 0;
+      for (var idx = 0; idx < params.length; idx++) {
+        var param = params[idx];
+        var offset = types[param];
+        
+        // TODO right straightforward alg first
+        // TODO static types - get type from array and read the data
+        // TODO right padding data - the same plus add '0x' for conversion
+        // TODO dynamic data - look for data location bytes, use them as offset to read the data 
+
+        // module.exports.debug("Shift:     " + shift);
+        // module.exports.debug("Shift end: " + (shift + offset));
+        
+        var data = input.slice(shift, shift + offset);
+        result.push(data);
+        shift += offset;
+
+        module.exports.debug("Data: " + data);
+        try {
+          module.exports.printToken(web3, param, data);
+        } catch(err) {
+          console.log("=== === ===");
+          console.log("Error");
+          console.log(err);
+          console.log("=== === ===");
+        }
+      }
+      // TODO get order of parameters
+      // TODO for each parameter get binded integer
+      // TODO got through input and with offset make a shift
+    },
+
+    parseRightPaddedData: function(web3) {
+      // [OK!] 'Hello World!'
+      var dataInput = '0x48656c6c6f2c20776f726c642100000000000000000000000000000000000000';
+      var result = web3.toUtf8(dataInput);
+      console.log("result: " + result);
+
+      // abc
+      var dataInput2 = '0x6162630000000000000000000000000000000000000000000000000000000000';
+      var result2 = web3.toUtf8(dataInput2);
+      console.log("result2: " + result2);
+
+      // def
+      var dataInput3 = '0x6465660000000000000000000000000000000000000000000000000000000000';
+      var result3 = web3.toUtf8(dataInput3);
+      console.log("result3: " + result3);
+    },
+
+    printToken: function(web3, dataType, data) {
+      console.log("printToken");
+      switch(dataType) {
+        case 'uint256':
+          // web3.toBigNumber(data);
+          var dataInHex = module.exports.addHexPrefix(data);
+          module.exports.debug('uint256 type');
+          module.exports.debug(web3.toBigNumber(dataInHex).toFixed());
+          break;
+        case 'address':
+          module.exports.debug('address type');
+          module.exports.debug(data);
+          break;
+        case 'bytes32':
+          module.exports.debug('bytes32 type');  
+          module.exports.debug(web3.toUtf8(data));
+          break;  
+        case 'uint32':
+          // [TEST PASSED]
+          module.exports.debug('uint32 type');
+          module.exports.debug(parseInt(data, 16));
+          break;
+        case 'bytes3':
+          // [TEST PASSED]
+          var dataInHex = module.exports.addHexPrefix(data);
+          module.exports.debug('bytes3: ' + dataInHex);
+          module.exports.debug(web3.toUtf8(dataInHex));
+          break;
+        case 'bool':
+          // [TEST PASSED]
+          module.exports.debug('bool type');
+          var boolAsInt = parseInt(data, 16);
+          module.exports.debug(boolAsInt == '1');
+          break;
+        case 'uint':
+          // [TEST PASSED]
+          module.exports.debug('uint type');
+          module.exports.debug(parseInt(data, 16));
+          break;
+        case 'uint8':
+          // [TEST PASSED]
+          module.exports.debug('uint8 type');
+          module.exports.debug(parseInt(data, 16));
+          break; 
+        case 'address':
+          var dataInHex = '0x' + data;//module.exports.addHexPrefix(data);
+          module.exports.debug('address type: ' + dataInHex);
+          module.exports.debug(web3.toUtf8(dataInHex));
+          break;
+      }
+    },
+
+    addHexPrefix: function(data) {
+      return '0x' + data;
+    },
+
+    debug: function(data) {
+      console.log(data);
+    },
+
 }
