@@ -27,7 +27,6 @@ const dataset = require('./dataset.js');
 const ethereum = require('./ethereum.js');
 const Promise = require('promise');
 const utils = require('./controllers/utils.js');
-const counter = require('./parser/counter.js');
 const InputDataDecoder = require('ethereum-input-data-decoder');
 const fs = require("fs");
 
@@ -76,16 +75,16 @@ function createProfiles() {
 app.use(cors());
 
 String.prototype.hashCode = function() {
-    var hash = 0;
-    if (this.length == 0) {
-        return hash;
-    }
-    for (var i = 0; i < this.length; i++) {
-        char = this.charCodeAt(i);
-        hash = ((hash<<5)-hash) + char;
-        hash = hash & hash; // Convert to 32bit integer
-    }
-    return hash;
+	var hash = 0;
+	if (this.length == 0) {
+		return hash;
+	}
+	for (var i = 0; i < this.length; i++) {
+		var char = this.charCodeAt(i);
+		hash = ((hash<<5)-hash) + char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
 }
 
 app.get(API_V1_PREFIX + '/users', function (req, res) {
@@ -108,27 +107,28 @@ app.post(API_V1_PREFIX + '/help/:mentee/:skill/:time', function (req, res) {
 	const profileName = req.params.mentee;
 	const skill = req.params.skill;
 	const time = req.params.time;
-    if (!(profileName in profiles)) {
+	if (!(profileName in profiles)) {
 		res.status(http.BAD_REQUEST)
-		   .send(utils.prepareResponse('User is not valid'));
-    } else {
+			.send(utils.prepareResponse('User is not valid'));
+	} else {
 		console.log("w3", "Process help request");
 		askForHelp(profileName, ORGANISATION, skill, time, COST)
-            .then(function(txHash) {
+			.then(function(txHash) {
 				console.log("w3", "Initiate consensus");
-                console.log("w3", "Hash: " + txHash);
-                var blockCount = isHackathon ? BLOCK_COUNT_HACKATHON : BLOCK_COUNT_FULL_LOAD; // considered as an optimal for start 
+				console.log("w3", "Hash: " + txHash);
+				addToWaitingQueue(profileName, ORGANISATION, skill, time);
+				var blockCount = isHackathon ? BLOCK_COUNT_HACKATHON : BLOCK_COUNT_FULL_LOAD; // considered as an optimal for start 
 				var timeout = 15 * 60;
 				res.status(http.SUCCESS).send(prepareResponse(true, txHash));
-                return startConsensus(web3, txHash, blockCount, timeout);
-            })
-            .catch(function(err) {
+				return startConsensus(web3, txHash, blockCount, timeout);
+			})
+			.catch(function(err) {
 				console.log("w3", err);
 				// process error here 
 				res.status(http.BAD_REQUEST).send(prepareResponse(false, err));
 			});
 		console.log("w3", "Process help request [end]");
-    }
+	}
 })
 
 app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (req, res) {
@@ -147,7 +147,7 @@ app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (re
 				var timeout = 15 * 60;
 				res.status(http.SUCCESS).send(prepareResponse(true, txHash));
 				
-				markedRequestAsProcessedInWaitingQueue(mentee, ORGANISATION, skill, time);
+				markedRequestAsProcessedInWaitingQueue(mentee, ORGANISATION, skill);
 				return startConsensus(web3, txHash, blockCount, timeout);
 			})
 			.catch(function(err) {
@@ -210,29 +210,6 @@ function registerMemberWithSkill(member, skill) {
 app.listen(config.port, () => {
 	debug('App started at port %d', config.port);
 })
-
-function certifyFunc(mentor, mentee, skill, time) {
-	return new Promise(function(fulfill) {
-		if (!(mentor in profiles) || !(mentee in profiles)) {
-			fulfill({
-				status: http.BAD_REQUEST,
-				message: 'Either mentor or mentee params is not valid'
-			});
-		} else {
-			var mentorAccount = getAccountByName(mentor);
-			var menteeAccount = getAccountByName(mentee);
-			console.log("w3", "certifyFunc");
-			console.log("w3", skill);
-			certify(mentorAccount, menteeAccount, skill, time, COST);
-			fulfill({
-				status: http.SUCCESS,
-				message: 'User was certified'
-			});
-			markedRequestAsProcessedInWaitingQueue(mentee, ORGANISATION, skill, time);
-			// TODO process negative scenario - no certification on blockchain
-		}
-	});
-}
 
 // endregion
 
@@ -321,8 +298,8 @@ function askForHelp(profileName, organisation, skill, time, cost) {
 			}
 		}
 
-        var account = getAccountByName(profileName); 
-        var hashKey = (String(skill) + String(organisation)).hashCode();
+		var account = getAccountByName(profileName); 
+		var hashKey = (String(skill) + String(organisation)).hashCode();
 		SkillsMarket.askForHelp.sendTransaction(
 			hashKey,
 			account,
@@ -338,22 +315,22 @@ function askForHelp(profileName, organisation, skill, time, cost) {
 }
 
 function startConsensus(currentNode, txHash, blockCount, timeout) {
-    return new Promise(function(resolve, reject) {
-        console.log("w3", "start consensus");
+	return new Promise(function(resolve, reject) {
+		console.log("w3", "start consensus");
 		addTransaction(txHash, false);
 		var callback = function(err, recipe) {
-            if (err) {
-                console.log("w3", "Error due achieving consensus");
-                return reject(err);
-            } else {
-                console.log("w3", recipe);
-                updateTransaction(txHash, true);
-                return resolve(txHash, true);
-            }
+			if (err) {
+				console.log("w3", "Error due achieving consensus");
+				return reject(err);
+			} else {
+				console.log("w3", recipe);
+				updateTransaction(txHash, true);
+				return resolve(txHash, true);
+			}
 		}
 
-        ethereum.awaitBlockConsensus(currentNode, txHash, blockCount, timeout, callback);
-    });
+		ethereum.awaitBlockConsensus(currentNode, txHash, blockCount, timeout, callback);
+	});
 }
 
 var skillRequestEvent = SkillsMarket.SkillRequest();
@@ -429,8 +406,6 @@ debugEventListener.watch(function(error, result) {
 
 var history = [];
 
-var historyHashes = [];
-
 function getHistory() {
 	console.log(history);
 	return "[" + history + "]";
@@ -440,17 +415,12 @@ function getNameByAccount(account) {
 	return getKeyByValue(profiles, account);
 }
 
-function trackHistoryTransaction(txHash) {
-	historyHashes.push(txHash);
-}
-
 // endregion
 
 // region transaction history
 
 function transactionHistory() {
-	return new Promise(function(resolve, reject) {
-		var data = [];
+	return new Promise(function(resolve) {
 		var latestBlockId = web3.eth.getBlock("latest").number;
 		while (latestBlockId > 0) {
 			var block = web3.eth.getBlock(latestBlockId, true);
@@ -476,7 +446,6 @@ function transactionHistory() {
 
 		console.log("w3", "end transactionHistory. Start track history");
 		return resolve();
-		// trackHistory(data, resolve, reject);
 	});
 }
 
@@ -514,7 +483,7 @@ function addToWaitingQueue(person, organisation, skill, time) {
  * - provide decorator whoch convert array of data into json format
  * */ 
 
-function markedRequestAsProcessedInWaitingQueue(person, organisation, skill, time) {
+function markedRequestAsProcessedInWaitingQueue(person, organisation, skill) {
 	var size = waitingQueue.length;
 	console.log("w3", "=====================");
 	console.log("w3", "markedRequestAsProcessedInWaitingQueue");
@@ -620,10 +589,6 @@ function getAccountByName(searchKey) {
 		}
 	});
 	return account;
-}
-
-function getItemByKey(data, searchKey) {
-	return Object.keys(data).find(key => data[key] === searchKey);
 }
 
 function getKeyByValue(object, value) {

@@ -1,5 +1,5 @@
 {
-  "name": "utseus_api",
+  "name": "skills-server",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -17,23 +17,30 @@
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "eslint": "4.13.0",
-    "eslint-plugin-node": "5.2.1",
+    "depcheck": "^0.6.8",
+    "eslint": "^4.14.0",
     "express": "^4.16.2",
     "jest": "^22.0.4",
     "mocha": "^4.1.0",
     "request": "^2.83.0"
   },
+  "eslintIgnore": [
+    "SkillsMarket.js"
+  ],
   "scripts": {
     "start": "env DEBUG=*,-express:* node ./app.js",
+    "depcheck": "./node_modules/depcheck/bin/depcheck",
     "test-mocha": "./node_modules/.bin/mocha --reporter spec",
     "test-jest": "jest",
-    "install": " npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai",
-    "truffle": "truffle init",
+    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck",
     "testrpc": "testrpc",
-    "decoder": "ethereum-input-data-decoder",
-    "print-hello": "echo 'hello world'"
+    "decoder": "ethereum-input-data-decoder"
   },
+  "pre-commit": [
+    "eslint --fix *.js",
+    "test-jest",
+    "depcheck"
+  ],
   "author": "ThimoVSS, DmitryK",
   "license": "ISC"
 }
