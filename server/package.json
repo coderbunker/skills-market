@@ -32,13 +32,14 @@
     "depcheck": "./node_modules/depcheck/bin/depcheck",
     "test-mocha": "./node_modules/.bin/mocha --reporter spec",
     "test-jest": "jest",
-    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck",
+    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck && npm install --save-dev eslint-config-recommended && npm install precommit-hook",
     "testrpc": "testrpc",
-    "decoder": "ethereum-input-data-decoder"
+    "decoder": "ethereum-input-data-decoder",
+    "lint": "eslint --fix *.js",
+    "validate": "npm ls"
   },
   "pre-commit": [
-    "eslint --fix *.js",
-    "test-jest",
+    "lint",
     "depcheck"
   ],
   "author": "ThimoVSS, DmitryK",

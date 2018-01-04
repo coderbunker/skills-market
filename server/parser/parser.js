@@ -29,7 +29,6 @@ module.exports = {
 	},
 
 	pushData: function(data, type) {
-		console.log(type + " : " + data);
 		var item = new Object();
 		item.type = type;
 		item.data = data;
@@ -53,7 +52,6 @@ module.exports = {
 		var element = input.slice(begin, end);
 		var length = parseInt(element, 16);
 		var offset = begin + ELEMENT_SIZE;
-		console.log("TYPE: " + type);
 		if (module.exports.isTypeIsArray(type)) {
 			var element = input.slice(begin, begin + ELEMENT_SIZE);
 			element = '0x' + element;
@@ -240,9 +238,7 @@ module.exports = {
 	},
 
 	parseSkill : function(data) {
-		console.log("Before buffer: " + data);
 		var buffer = new Buffer(data).toString();
-		console.log("After buffer: " + buffer);
 		var result = buffer.replace(/\0/g, '');
 		return result;
 	},
