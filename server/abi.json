@@ -272,36 +272,6 @@
 		"constant": false,
 		"inputs": [
 			{
-				"name": "mentor",
-				"type": "address"
-			},
-			{
-				"name": "mentee",
-				"type": "address"
-			},
-			{
-				"name": "hashKey",
-				"type": "uint256"
-			},
-			{
-				"name": "time",
-				"type": "uint8"
-			},
-			{
-				"name": "cost",
-				"type": "uint8"
-			}
-		],
-		"name": "certify",
-		"outputs": [],
-		"payable": false,
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"constant": false,
-		"inputs": [
-			{
 				"name": "owner",
 				"type": "address"
 			},
@@ -373,6 +343,40 @@
 		],
 		"payable": false,
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "skill",
+				"type": "bytes32"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "certify",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

@@ -49,7 +49,7 @@ contract SkillsMarket {
         Payment(mentor, mentee, msg.value);
     }
 
-    function certify(address mentor, address mentee, uint256 hashKey, uint8 time, uint8 cost) public {
+    function certify(address mentor, address mentee, bytes32 skill, uint256 hashKey, uint8 time, uint8 cost) public {
         // TODO check if requested mentorship time is equal provided time
 
         Debug(msg.sender, 10);

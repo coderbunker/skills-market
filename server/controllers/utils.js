@@ -1,7 +1,7 @@
 var users = [
-    'Dmitry',
-    'Ricky',
-    'Abhishek'
+    'Zara',
+    'Nick',
+    'Evelyn'
 ];
 
 var transactions = [];

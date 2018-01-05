@@ -39,7 +39,7 @@ var web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
 console.info('w3', web3.eth.accounts);
 
 parser.addSignature(
-	web3.sha3('certify(address,address,uint256,uint8,uint8)'),
+	web3.sha3('certify(address,address,bytes32,uint256,uint8,uint8)'),
 	['address','address','uint256','uint8','uint8']
 );
 parser.addSignature(
@@ -159,6 +159,7 @@ app.post(API_V1_PREFIX + '/mentoring/:mentor/:mentee/:skill/:time', function (re
 app.get(API_V1_PREFIX + '/dashboard', function (req, res) {
 	console.log("w3", "request dashboard");
 	console.log("w3", "History: " + getHistory());
+	history = [];
 	transactionHistory().then(() => {
 		var json = JSON.parse(getHistory());
 		res.status(http.SUCCESS).json(json);
@@ -350,12 +351,11 @@ function certify(mentorAccount, menteeAccount, skill, time) {
 	return new Promise(function(resolve, reject) {
 		console.log("w3", "[start] certify");
 		var callback = function(err, txHash) {
-			
-			processInputForTransaction(txHash);
-			
+				
 			if (err) {
 				reject(prepareResponse(false, err));
 			} else {
+				processInputForTransaction(txHash);
 				resolve(prepareResponse(true, txHash));
 			}
 
@@ -363,7 +363,8 @@ function certify(mentorAccount, menteeAccount, skill, time) {
 		var hashKey = (String(skill) + String(ORGANISATION)).hashCode();
 		SkillsMarket.certify.sendTransaction(
 			mentorAccount, 
-			menteeAccount, 
+			menteeAccount,
+			web3.fromAscii(skill), 
 			hashKey, 
 			time, 
 			time * COST,
@@ -430,11 +431,14 @@ function transactionHistory() {
 					var isItRightTx2 = JSON.stringify(result) != JSON.stringify({});
 					if (isItRightTx2) {
 						console.log(result);
+						console.log("===");
+						console.log("Skill (unparsed): " + result.inputs[2]);
+						console.log("===");
 						var item = { 
 							"from" : getNameByAccount("0x" + result.inputs[0]), 
 							"to" : getNameByAccount("0x" + result.inputs[1]), 
 							"skill" : parser.parseSkill(result.inputs[2]), 
-							"time" : parser.parseTime(result.inputs[3])
+							"time" : parser.parseTime(result.inputs[4])
 						};
 						history.push(JSON.stringify(item));
 						console.log(history);
