@@ -89,8 +89,7 @@ String.prototype.hashCode = function() {
 
 app.get(API_V1_PREFIX + '/users', function (req, res) {
 	console.log("w3", "request users");
-	console.log("w3", getUsers());
-	var json = getUsers();
+	var json = utils.getUsers();
 	res.status(http.SUCCESS).json(json);
 });
 

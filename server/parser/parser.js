@@ -1,8 +1,8 @@
-var signatures = [];
+const signatures = [];
 
-var ELEMENT_SIZE = 64;
+const ELEMENT_SIZE = 64;
 
-var output = [];
+const output = [];
 
 /**
  * Dynamic part:
@@ -13,117 +13,121 @@ var output = [];
 
 module.exports = {
 
-	parse: function(web3, input, params) {
+	parse(web3, input, params) {
 		const mapping = module.exports.createMapping(input, params);
 		const size = JSON.parse(JSON.stringify(mapping.length));
 		input = module.exports.getInputWithoutSignature(input);
-		for (var id = 0; id < size; id++) {
-			var locator = mapping[id];
-			module.exports.extractData(id, 
-				input, 
-				locator.type, 
-				locator.begin, 
-				locator.end);
+		for (let id = 0; id < size; id++) {
+			const locator = mapping[id];
+			module.exports.extractData(
+				id,
+				input,
+				locator.type,
+				locator.begin,
+				locator.end
+			);
 		}
 		return module.exports.convertFromHexToData(web3, output);
 	},
 
-	pushData: function(data, type) {
-		var item = new Object();
+	pushData(data, type) {
+		const item = {};
 		item.type = type;
 		item.data = data;
 		output.push(item);
 	},
 
-	extractData: function(id, input, type, begin, end) {
-		// for dynamic part calculate amount of elements 
+	extractData(id, input, type, begin, end) {
+		// for dynamic part calculate amount of elements
 		// for static part extract data from start to end
 		if (module.exports.isDynamicType(type)) {
 			// get the length of array
 			module.exports.extractDynamicData(input, type, begin, end);
 		} else {
-			var element = input.slice(begin, end);
+			const element = input.slice(begin, end);
 			// data.push(element);
 			module.exports.pushData(element, type);
 		}
 	},
 
-	extractDynamicData: function(input, type, begin, end) {
-		var element = input.slice(begin, end);
-		var length = parseInt(element, 16);
-		var offset = begin + ELEMENT_SIZE;
+	extractDynamicData(input, type, begin, end) {
+		let element = input.slice(begin, end);
+		let length = parseInt(element, 16);
+		let offset = begin + ELEMENT_SIZE;
 		if (module.exports.isTypeIsArray(type)) {
-			var element = input.slice(begin, begin + ELEMENT_SIZE);
-			element = '0x' + element;
-			var length = parseInt(element, 16);
-			var offset = begin + ELEMENT_SIZE;
-			for (var id = 0; id < length; id++) {
-				var element = input.slice(offset, offset + ELEMENT_SIZE);
+			element = input.slice(begin, begin + ELEMENT_SIZE);
+			element = `0x${element}`;
+			length = parseInt(element, 16);
+			offset = begin + ELEMENT_SIZE;
+			for (let id = 0; id < length; id++) {
+				element = input.slice(offset, offset + ELEMENT_SIZE);
 				module.exports.pushData(element, type);
 				offset += ELEMENT_SIZE;
 			}
 		} else if (module.exports.isDynamicType(type)) {
-			begin = begin + ELEMENT_SIZE;
+			begin += ELEMENT_SIZE;
 			end = begin + ELEMENT_SIZE;
-			var element = input.slice(begin, end);
+			element = input.slice(begin, end);
 			module.exports.pushData(element, type);
 		} else {
-			var element = input.slice(begin, end);
+			element = input.slice(begin, end);
 			module.exports.pushData(element, type);
 		}
 	},
 
-	createMapping: function(input, paramTypes) {
-		var data = [];
-		var str = module.exports.getInputWithoutSignature(input);
-		var shift = 0;
-		for (var id = 0; id < paramTypes.length; id++) {
+	createMapping(input, paramTypes) {
+		const data = [];
+		const str = module.exports.getInputWithoutSignature(input);
+		let shift = 0;
+		for (let id = 0; id < paramTypes.length; id++) {
 			if (module.exports.isDynamicType(paramTypes[id])) {
 				// process dynamic type
 				// for dynamic param find amount of elements in the array
-				var start = module.exports.findStartOfDynamicParam(str, shift);
-				var end = module.exports.findEndOfDynamicParam(paramTypes[id], str, start);
+				let start = module.exports.findStartOfDynamicParam(str, shift);
+				let end = module.exports
+					.findEndOfDynamicParam(paramTypes[id], str, start);
 				module.exports.addParamData(data, paramTypes[id], start, end);
 				shift += ELEMENT_SIZE;
 			} else {
 				// process static type
-				var start = shift;
-				var end = module.exports.findEndOfStaticParam(shift);
+				let start = shift;
+				let end = module.exports.findEndOfStaticParam(shift);
 				module.exports.addParamData(data, paramTypes[id], start, end);
 				shift += ELEMENT_SIZE;
 			}
 		}
 		return data;
-	},    
+	},
 
-	findEndOfStaticParam: function(offset) {
+	findEndOfStaticParam(offset) {
 		return offset + ELEMENT_SIZE;
 	},
 
-	findStartOfDynamicParam: function(str, offset) {
-		var data = str.slice(offset, offset + ELEMENT_SIZE);
-		var startOfArrayDataPart = parseInt(data, 16);
-		return startOfArrayDataPart * 2; 
+	findStartOfDynamicParam(str, offset) {
+		const data = str.slice(offset, offset + ELEMENT_SIZE);
+		const startOfArrayDataPart = parseInt(data, 16);
+		return startOfArrayDataPart * 2;
 	},
 
-	findEndOfDynamicParam: function(paramType, str, offset) {
+	findEndOfDynamicParam(paramType, str, offset) {
 		// offset is a data locatior value which point out on the length of array
-		var arrayDataPartEnd = offset + ELEMENT_SIZE;
-		var end;
+		const arrayDataPartEnd = offset + ELEMENT_SIZE;
+		let end;
 		if (module.exports.isTypeIsArray(paramType)) {
-			var data = str.slice(offset, arrayDataPartEnd);
-			var elementsCount = parseInt(data, 16);
+			const data = str.slice(offset, arrayDataPartEnd);
+			const elementsCount = parseInt(data, 16);
 			end = arrayDataPartEnd + elementsCount * ELEMENT_SIZE;
 		} else {
-			// in case of 'bytes' and 'string' we skip length of the array and read data directly
+			// in case of 'bytes' and 'string' we skip length of the
+			// array and read data directly
 			end = arrayDataPartEnd;
 		}
-        
+
 		return end;
 	},
 
-	isDynamicType: function(paramType) {
-		var result = false;
+	isDynamicType(paramType) {
+		let result = false;
 		if (paramType == 'bytes') {
 			result = true;
 		} else if (paramType == 'string') {
@@ -134,43 +138,44 @@ module.exports = {
 		return result;
 	},
 
-	isTypeIsArray: function(paramType) {
+	isTypeIsArray(paramType) {
 		return paramType.substring(paramType.length - 2) == '[]';
 	},
 
-	addParamData: function(data, paramType, start, end) {
+	addParamData(data, paramType, start, end) {
 		// add begining and ending for this type
-		var paramData = new Object();
+		const paramData = {};
 		paramData.type = paramType;
 		paramData.begin = start;
 		paramData.end = end;
 		data.push(paramData);
 	},
 
-	getInputWithoutSignature: function(data) {
-		var start = 10;
-		var end = data.length;
+	getInputWithoutSignature(data) {
+		const start = 10;
+		const end = data.length;
 		return data.substring(start, end);
 	},
 
-	convertFromHexToData: function(web3, data) { 
-		var result = [];
-		for (var id = 0; id < data.length; id++) {
-			var converted = module.exports.convert(web3, data[id].type, data[id].data);
+	convertFromHexToData(web3, data) {
+		const result = [];
+		for (let id = 0; id < data.length; id++) {
+			const converted = module.exports
+				.convert(web3, data[id].type, data[id].data);
 			result.push(converted);
 		}
 		return result;
 	},
 
-	convert: function(web3, dataType, data) {
-		var result = new Object();
+	convert(web3, dataType, data) {
+		const result = {};
 		result.type = dataType;
-		result.data = "tbd";
-		switch(dataType) {
+		result.data = 'tbd';
+		switch (dataType) {
 		case 'uint256[]':
 		case 'uint256':
-			var dataInHex = module.exports.addHexPrefix(data);
-			result.data = web3.toBigNumber(dataInHex).toFixed();
+			result.data = web3.toBigNumber(module.exports.addHexPrefix(data))
+					.toFixed();
 			break;
 		case 'bytes32':
 		case 'bytes':
@@ -180,77 +185,74 @@ module.exports = {
 			result.data = parseInt(data, 16);
 			break;
 		case 'bytes3':
-			var dataInHex = module.exports.addHexPrefix(data);
-			result.data = web3.toUtf8(dataInHex);
+			result.data = web3.toUtf8(module.exports.addHexPrefix(data));
 			break;
 		case 'bool':
-			var boolAsInt = parseInt(data, 16);
-			result.data = boolAsInt == '1';
+			result.data = parseInt(data, 16) == '1';
 			break;
 		case 'uint':
 		case 'uint8':
 			result.data = parseInt(data, 16);
-			break; 
+			break;
 		case 'address':
-			var dataInHex = '0x' + data;
-			result.data = web3.toUtf8(dataInHex);
+			result.data = web3.toUtf8(`0x ${data}`);
 			break;
 		default:
-			throw 'Unsupported data type: ' + dataType;
+			console.log(dataType);
 		}
 
-		return result; 
+		return result;
 	},
 
-	addSignature: function(signature, params) {
-		var key = signature.substring(0, 10);
+	addSignature(signature) {
+		const key = signature.substring(0, 10);
 		signatures.push(key);
 	},
 
-	getParamsForSignature: function(input) {
-		var key = input.substring(0, 10);
-		var params = signatures[key];
-		return params == 'undefined' ? [] : signature[key];
-	}, 
+	getParamsForSignature(input) {
+		const key = input.substring(0, 10);
+		const params = signatures[key];
+		return params == 'undefined' ? [] : signatures[key];
+	},
 
-	getSignatureSize: function() {
+	getSignatureSize() {
 		return signatures.length;
 	},
 
-	getSignatures: function() {
+	getSignatures() {
 		return signatures;
 	},
 
-	isTrackedTransaction: function(input) {
-		var key = input.substring(0, 10);
+	isTrackedTransaction(input) {
+		const key = input.substring(0, 10);
 		return signatures.includes(key);
 	},
 
-	addHexPrefix: function(data) {
-		return '0x' + data;
+	addHexPrefix(data) {
+		return `0x${data}`;
 	},
 
-	parseSkillFromByteArrayInString : function(data) {
-		var tokens = JSON.stringify(result.inputs[2]).split(":");
-		var data = tokens[3];
+	parseSkillFromByteArrayInString(result) {
+		const tokens = JSON.stringify(result.inputs[2]).split(':');
+		let data = tokens[3];
 		data = data.slice(0, data.length - 1);
-		return data; 
+		return data;
 	},
 
-	parseSkill : function(data) {
-		var buffer = new Buffer(data).toString();
-		var result = buffer.replace(/\0/g, '');
+	parseSkill(data) {
+		const buffer = new Buffer(data).toString();
+		const result = buffer.replace(/\0/g, '');
 		return result;
 	},
 
-	parseTime : function(data) {
+	parseTime(data) {
 		data = JSON.stringify(data);
 		data = data.substring(5, data.length - 2);
-		var result = parseInt(data, 16);
+		const result = parseInt(data, 16);
 		return result;
 	},
 
-	debug: function(data) {
+	debug(data) {
 		console.log(data);
-	}
-}
+	},
+};

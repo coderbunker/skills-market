@@ -1,4 +1,4 @@
-const debug = require('debug')('endpoint-register')
+const debug = require('debug')('endpoint-register');
 
 const util = require('util');
 const http = require('../http.js');
@@ -12,36 +12,39 @@ function correctLength(member) {
 	return l >= MEMBER_MIN_NAME_LENGTH && l <= MEMBER_MAX_NAME_LENGTH;
 }
 
-function memberExists(member){
+function memberExists(member) {
 	return member == null;
 }
 
 module.exports = function(member) {
-	return new Promise(function(fulfill){
-		debug('attempting to registering', member)
+	return new Promise(((fulfill) => {
+		debug('attempting to registering', member);
 		if (!correctLength(member)) {
-			debug(member, 'had incorrect length')
+			debug(member, 'had incorrect length');
+			const str = 'member name should be equal or longer than %s' +
+				+ ' and shorter or equal to %s characters';
 			fulfill({
-				status: http.BAD_REQUEST, 
+				status: http.BAD_REQUEST,
 				message: util.format(
-					'member name should be equal or longer than %s and shorter or equal to %s characters',
+					str,
 					MEMBER_MIN_NAME_LENGTH,
-					MEMBER_MAX_NAME_LENGTH)
+					MEMBER_MAX_NAME_LENGTH
+				),
 			});
 			return;
 		}
 		if (memberExists(member)) {
-			debug(member, 'already exists')
+			debug(member, 'already exists');
 			fulfill({
 				status: http.BAD_REQUEST,
-				message: 'member already exists'
+				message: 'member already exists',
 			});
 			return;
 		}
-		debug('successfully registered', member)
+		debug('successfully registered', member);
 		fulfill({
 			status: http.SUCCESS,
-			message: 'member ' + member + ' was successfully registered'
+			message: `member ${member} was successfully registered`,
 		});
-	})
-}
+	}));
+};

@@ -1,68 +1,69 @@
-var users = [
-    'Zara',
-    'Nick',
-    'Evelyn'
+const users = [
+	'Zara',
+	'Nick',
+	'Evelyn',
 ];
 
-var transactions = [];
+const transactions = [];
 
 module.exports = {
 
-    prepareResponse : function(message) {
-        // TODO for now simple message is left for backward compatibility
-        // var response = {'status' : status, 'message' : message};
-        return message;
-    },
+	prepareResponse(message) {
+		// TODO for now simple message is left for backward compatibility
+		// var response = {'status' : status, 'message' : message};
+		return message;
+	},
 
-    getAccountByName : function(profiles, searchKey) {
-        console.log("w3", "getAccountByName");
-        var account;
-        Object.keys(profiles).find(function(key) {
-            if (key === searchKey) {
-                account = profiles[key];
-            }
-        });
-        return account;
-    },
+	getAccountByName(profiles, searchKey) {
+		console.log('w3', 'getAccountByName');
+		let account;
+		Object.keys(profiles).find((key) => {
+			if (key === searchKey) {
+				account = profiles[key];
+			}
+		});
+		return account;
+	},
 
-    addTransaction : function(txHash, isMined) {
-        console.log("w3", "addTransaction: " + txHash);
-        var item = {};
-        item[txHash] = isMined;
-        transactions.push(item);
-    },
+	addTransaction(txHash, isMined) {
+		console.log('w3', `addTransaction: ${txHash}`);
+		const item = {};
+		item[txHash] = isMined;
+		transactions.push(item);
+	},
 
-    updateTransaction : function(txHash, isMined) {
-        console.log("w3", "updateTransaction: " + txHash);
-        var isProcessed = false;
-        for (var idx = 0; idx < transactions.length; idx++) {
-            for (var key in transactions[idx]) {
-                if (txHash == key) {
-                    var item = {};
-                    item[txHash] = isMined;
-                    transactions[idx] = item;
-                    isProcessed = true;
-                    break;
-                } 
-            }
-        }
-    
-        if (!isProcessed) {
-            module.exports.addTransaction(txHash, isMined);
-        }
-    },
+	updateTransaction(txHash, isMined) {
+		console.log('w3', `updateTransaction: ${txHash}`);
+		let isProcessed = false;
+		for (let idx = 0; idx < transactions.length; idx++) {
+			for (const key in transactions[idx]) {
+				if (txHash == key) {
+					const item = {};
+					item[txHash] = isMined;
+					transactions[idx] = item;
+					isProcessed = true;
+					break;
+				}
+			}
+		}
 
-    isAccountInProfiles : function(profiles, searchValue) {
-        console.log("w3", "isAccountInProfiles: ");
-        var account = Object.keys(profiles).find(key => profiles[key] === searchValue);
-        return (typeof account != "undefined");
-    },
+		if (!isProcessed) {
+			module.exports.addTransaction(txHash, isMined);
+		}
+	},
 
-    getKeyByValue : function(dataset, value) {
-        return Object.keys(dataset).find(key => dataset[key] === value);
-    },
+	isAccountInProfiles(profiles, searchValue) {
+		console.log('w3', 'isAccountInProfiles: ');
+		const account = Object.keys(profiles)
+			.find((key) => profiles[key] === searchValue);
+		return (typeof account !== 'undefined');
+	},
 
-    getUsers : function() {
-        return users;
-    }
-}
+	getKeyByValue(dataset, value) {
+		return Object.keys(dataset).find((key) => dataset[key] === value);
+	},
+
+	getUsers() {
+		return users;
+	},
+};
