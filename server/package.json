@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=4.0.0"
   },
+  "plugins": [
+    "jest"
+  ],
   "dependencies": {
     "cors": "^2.8.4",
     "debug": "^3.1.0",
@@ -22,34 +25,13 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jest": "^21.5.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
     "express": "^4.16.2",
     "jest": "^22.0.4",
     "mocha": "^4.1.0",
     "request": "^2.83.0"
-  },
-  "eslintConfig": {
-    "extends": ["eslint:recommended", "google"],
-    "env": {
-      "node": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 6
-    },
-    "globals": {
-      "test": false,
-      "expect": false,
-      "describe": false,
-      "it": false,
-      "Promise": false
-    },
-    "rules": {
-      "no-tabs": 0,
-      "no-console": 0,
-      "no-constant-condition": "off",
-      "require-jsdoc": 0
-    }
   },
   "eslintIgnore": [
     "SkillsMarket.js",
@@ -58,9 +40,9 @@
   ],
   "scripts": {
     "start": "env DEBUG=*,-express:* node ./app.js",
-    "depcheck": "./node_modules/depcheck/bin/depcheck",
+    "depcheck": "./node_modules/depcheck/bin/depcheck --ignores eslint-config-airbnb,eslint-config-google,eslint-plugin-import,eslint-plugin-jsx-a11y,eslint-plugin-react",
     "test": "jest",
-    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck && npm install --save-dev eslint-config-recommended && npm install precommit-hook &&  npm i eslint-plugin-react@latest --save-dev && npm i eslint-plugin-import@latest --save-dev",
+    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck && npm install --save-dev eslint-config-recommended && npm install precommit-hook &&  npm i eslint-plugin-react@latest --save-dev && npm i eslint-plugin-import@latest --save-dev && npm install --save-dev eslint-plugin-jest",
     "testrpc": "testrpc",
     "decoder": "ethereum-input-data-decoder",
     "lint": "eslint --fix **/*.js --ignore-pattern node_modules/",
