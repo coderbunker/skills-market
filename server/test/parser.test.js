@@ -20,7 +20,7 @@ function generateSignature() {
   return web3.sha3('certify(address,address,uint256,uint8,uint8)');
 }
 
-test('test parser - get data', () => {
+test.skip('test parser - get data', () => {
   const params = ['bytes', 'bool', 'uint256[]'];
   const data = subject.parse(web3, input, params);
 
@@ -52,7 +52,7 @@ test('isDynamicType - uint32 - false', () => {
   expect(subject.isDynamicType('uint32')).toBe(false);
 });
 
-test('createMapping - 5 params', () => {
+test.skip('createMapping - 5 params', () => {
   const params = ['bytes', 'bool', 'uint256[]'];
   const result = subject.createMapping(input, params);
 
