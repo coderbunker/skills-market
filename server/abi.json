@@ -1,0 +1,579 @@
+[
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "getBalanceWithGuard",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "findCertForMentor",
+		"outputs": [
+			{
+				"name": "mentorCertIdx",
+				"type": "int8"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "getSkillForMember",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "member",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "skill",
+				"type": "bytes32"
+			},
+			{
+				"name": "spendHours",
+				"type": "uint256"
+			},
+			{
+				"name": "demandHours",
+				"type": "uint256"
+			}
+		],
+		"name": "registerMemberSkills",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "person",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			}
+		],
+		"name": "getSkillName",
+		"outputs": [
+			{
+				"name": "skillName",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "mentee",
+				"type": "address"
+			}
+		],
+		"name": "findCertLengthForMentee",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "person",
+				"type": "address"
+			}
+		],
+		"name": "makeTransfer",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "findFullCertForSkillMentee",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "updateCerts",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "person",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			}
+		],
+		"name": "getSkillLevel",
+		"outputs": [
+			{
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			}
+		],
+		"name": "getCertificateHours",
+		"outputs": [
+			{
+				"name": "",
+				"type": "int8"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "x",
+				"type": "uint256"
+			}
+		],
+		"name": "toBytes",
+		"outputs": [
+			{
+				"name": "result",
+				"type": "bytes"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "findCertForSkillMentee",
+		"outputs": [
+			{
+				"name": "menteeCertIdx",
+				"type": "int8"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "skill",
+				"type": "bytes32"
+			},
+			{
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"name": "time",
+				"type": "uint8"
+			},
+			{
+				"name": "cost",
+				"type": "uint8"
+			}
+		],
+		"name": "certify",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"name": "mentor",
+				"type": "address"
+			}
+		],
+		"name": "transferDeposit",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "hash",
+				"type": "uint256"
+			}
+		],
+		"name": "getAmountOfPeopleWaitingForHelp",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "hash",
+				"type": "uint256"
+			},
+			{
+				"name": "org",
+				"type": "address"
+			},
+			{
+				"name": "skill",
+				"type": "bytes32"
+			},
+			{
+				"name": "time",
+				"type": "uint256"
+			},
+			{
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "askForHelp",
+		"outputs": [],
+		"payable": true,
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "person",
+				"type": "address"
+			}
+		],
+		"name": "getCertificate",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "hash",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "org",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "skill",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "time",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "cost",
+				"type": "uint256"
+			}
+		],
+		"name": "SkillRequest",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "hashKey",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "skill",
+				"type": "bytes32"
+			}
+		],
+		"name": "MentorCertification",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "mentor",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "mentee",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "Payment",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "code",
+				"type": "uint256"
+			}
+		],
+		"name": "Debug",
+		"type": "event"
+	}
+]

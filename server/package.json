@@ -1,0 +1,57 @@
+{
+  "name": "skills-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "plugins": [
+    "jest"
+  ],
+  "dependencies": {
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "ethereum-input-data-decoder": "0.0.3",
+    "ethereumjs-testrpc": "^6.0.3",
+    "promise": "^8.0.1",
+    "truffle": "^4.0.4",
+    "web3": "^0.19.1"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "depcheck": "^0.6.8",
+    "eslint": "^4.14.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-google": "^0.9.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jest": "^21.5.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.5.1",
+    "express": "^4.16.2",
+    "jest": "^22.0.4",
+    "mocha": "^4.1.0",
+    "request": "^2.83.0"
+  },
+  "eslintIgnore": [
+    "SkillsMarket.js",
+    "abi.json",
+    "legacy/"
+  ],
+  "scripts": {
+    "start": "env DEBUG=*,-express:* node ./app.js",
+    "depcheck": "./node_modules/depcheck/bin/depcheck --ignores eslint-config-airbnb,eslint-config-google,eslint-plugin-import,eslint-plugin-jsx-a11y,eslint-plugin-react,eslint-plugin-jest",
+    "test": "jest,eslint-config-plugin:jest",
+    "install": "npm install truffle && npm install ethereumjs-testrpc && npm install ethereum-input-data-decoder && npm install --save-dev jest && npm install --save-dev mocha && npm install --save-dev request && npm install --save-dev express && npm install --save-dev chai && npm install --save-dev pre-commit && npm install --save-dev eslint && npm install --save-dev depcheck && npm install --save-dev eslint-config-recommended && npm install precommit-hook &&  npm i eslint-plugin-react@latest --save-dev && npm i eslint-plugin-import@latest --save-dev && npm install --save-dev eslint-plugin-jest",
+    "testrpc": "testrpc",
+    "decoder": "ethereum-input-data-decoder",
+    "lint": "eslint --fix **/*.js --ignore-pattern node_modules/",
+    "validate": "npm ls"
+  },
+  "pre-commit": [
+    "lint",
+    "depcheck"
+  ],
+  "author": "ThimoVSS, DmitryK",
+  "license": "ISC"
+}
